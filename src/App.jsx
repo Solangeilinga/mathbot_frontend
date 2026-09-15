@@ -15,6 +15,7 @@ import { progressionAPI } from "./utils/api";
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [currentChapter, setCurrentChapter] = useState("Probabilités");
+  const [currentExamSession, setCurrentExamSession] = useState("2025");
   const { toast, showToast } = useToast();
   const { user, authError, authLoading, login, register, logout, updateXP } = useAuth();
   const { chapitres, stats, loading: progLoading, refetch } = useProgression();
@@ -42,9 +43,10 @@ export default function App() {
     refetch();
   };
 
-  const goToChapter = (ch, isExam = false) => {
+  const goToChapter = (ch, isExam = false, examSession = "2025") => {
     setCurrentChapter(ch);
     if (isExam) {
+      setCurrentExamSession(examSession);
       setActivePage("exam");
       showToast(`Simulation d'examen lancée : ${ch}`);
     } else {
@@ -84,7 +86,7 @@ export default function App() {
         )}
         {activePage === "annales" && (
           <AnnalesPage
-            onStartExam={(ch) => goToChapter(ch, true)}
+            onStartExam={(ch, session) => goToChapter(ch, true, session)}
             showToast={showToast}
             chapitres={chapitres}
           />
@@ -92,6 +94,7 @@ export default function App() {
         {activePage === "exam" && (
           <ExamSimulationPage
             chapter={currentChapter}
+            session={currentExamSession}
             onExit={exitExam}
             showToast={showToast}
             user={user}

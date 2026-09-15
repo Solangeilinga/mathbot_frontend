@@ -54,7 +54,7 @@ const fmt = s => {
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
 };
 
-export default function ExamSimulationPage({ chapter, onExit, showToast }) {
+export default function ExamSimulationPage({ chapter, session = "2025", onExit, showToast }) {
   const [timeLeft, setTimeLeft]   = useState(EXAM_DURATION);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
@@ -70,35 +70,27 @@ export default function ExamSimulationPage({ chapter, onExit, showToast }) {
   const timerRef  = useRef(null);
   const submitted = useRef(false);
 
-  // Charge le sujet — utilise "Mixte" si chapter = "Mixte", sinon session générique
+  // Charge le sujet demandé (session + chapitre exacts) — pas de repli silencieux
+  // sur un autre sujet : mieux vaut dire clairement "pas encore disponible" que
+  // de faire croire qu'une année propose un contenu qu'elle n'a pas.
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Essai 1 : sujet correspondant au chapitre exact
-        let data = null;
-        try {
-          data = await subjectAPI.getSubject("2025", chapter === "Mixte" ? "Mixte" : chapter);
-        } catch {
-          // Essai 2 : sujet Mixte par défaut
-          try {
-            data = await subjectAPI.getSubject("2025", "Mixte");
-          } catch {
-            throw new Error("Aucun sujet disponible. Lance d'abord le script insertTestSubject.js");
-          }
-        }
-
+        const data = await subjectAPI.getSubject(session, chapter);
         setSubject(data);
         setQuestions(parseSujet(data.sujet));
-      } catch (err) {
-        setError(err.message);
+      } catch {
+        setError(
+          `Le sujet BEPC ${session} (${chapter}) n'est pas encore disponible. ` +
+          `Seul le sujet BEPC 2025 (Mixte) est actif pour l'instant — reviens aux annales et essaie celui-là.`
+        );
       } finally {
         setLoading(false);
       }
     })();
-  }, [chapter]);
+  }, [chapter, session]);
 
   // Timer
   useEffect(() => {
@@ -174,9 +166,6 @@ export default function ExamSimulationPage({ chapter, onExit, showToast }) {
   if (error) return (
     <div className="exam-error">
       <p>❌ {error}</p>
-      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
-        Assure-toi d'avoir lancé : <code>node scripts/insertTestSubject.js</code>
-      </p>
       <button className="btn-secondary" onClick={onExit}>← Retour</button>
     </div>
   );
@@ -213,7 +202,7 @@ export default function ExamSimulationPage({ chapter, onExit, showToast }) {
       {/* Header */}
       <div className="exam-header">
         <div>
-          <div className="exam-header-title">BEPC 2025 — Examen Blanc</div>
+          <div className="exam-header-title">BEPC {session} — Examen Blanc</div>
           <div className="exam-header-sub">{answered}/{totalQ} réponses</div>
         </div>
         <div style={{ textAlign: "right" }}>

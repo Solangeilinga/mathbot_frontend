@@ -1,5 +1,5 @@
 const ANNALES = [
-  { year: "2025", title: "Sujet BEPC 2025", chapitres: ["Mixte"], session: "2025" },
+  { year: "2025", title: "Sujet BEPC 2025", chapitres: ["Mixte"] },
   { year: "2023", title: "Sujet BEPC 2023", chapitres: ["Probabilités", "Géométrie", "Algèbre"] },
   { year: "2022", title: "Sujet BEPC 2022", chapitres: ["Fonctions", "Statistiques", "Trigonométrie"] },
   { year: "2021", title: "Sujet BEPC 2021", chapitres: ["Algèbre", "Probabilités", "Géométrie"] },
@@ -37,7 +37,7 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
               key={a.year}
               className="annale-item"
               onClick={() => {
-                onStartExam(chapitreExam);
+                onStartExam(chapitreExam, a.year);
                 showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
               }}
             >
@@ -51,7 +51,7 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
                 className="annale-start-btn"
                 onClick={e => {
                   e.stopPropagation();
-                  onStartExam(chapitreExam);
+                  onStartExam(chapitreExam, a.year);
                   showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
                 }}
               >
@@ -69,7 +69,7 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
           <button
             className="annales-exam-btn"
             onClick={() => {
-              onStartExam("Mixte");
+              onStartExam("Mixte", "2025");
               showToast("Mode Examen Blanc lancé !");
             }}
           >
