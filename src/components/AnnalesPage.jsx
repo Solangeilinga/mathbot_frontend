@@ -1,8 +1,16 @@
+// Un sujet BEPC officiel (1er tour) couvre toujours plusieurs chapitres à la
+// fois — il est donc stocké côté backend sous chapitre "Mixte" pour chaque
+// session, jamais sous un seul chapitre. Les tags "chapitres" ci-dessous sont
+// juste informatifs (thèmes réellement présents dans le sujet, pour l'affichage
+// et le score par thème) — 2025/2023/2022/2021 sont de vrais sujets transcrits ;
+// 2020 n'a pas été trouvé (aucune source fiable, probablement lié aux
+// perturbations de cette session au Burkina Faso) et retombera sur le message
+// "pas encore disponible".
 const ANNALES = [
   { year: "2025", title: "Sujet BEPC 2025", chapitres: ["Mixte"] },
-  { year: "2023", title: "Sujet BEPC 2023", chapitres: ["Probabilités", "Géométrie", "Algèbre"] },
-  { year: "2022", title: "Sujet BEPC 2022", chapitres: ["Fonctions", "Statistiques", "Trigonométrie"] },
-  { year: "2021", title: "Sujet BEPC 2021", chapitres: ["Algèbre", "Probabilités", "Géométrie"] },
+  { year: "2023", title: "Sujet BEPC 2023", chapitres: ["Algèbre", "Géométrie", "Fonctions"] },
+  { year: "2022", title: "Sujet BEPC 2022", chapitres: ["Fonctions", "Algèbre", "Statistiques"] },
+  { year: "2021", title: "Sujet BEPC 2021", chapitres: ["Algèbre", "Géométrie", "Statistiques"] },
   { year: "2020", title: "Sujet BEPC 2020", chapitres: ["Trigonométrie", "Fonctions", "Statistiques"] },
 ];
 
@@ -30,14 +38,12 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
 
         {ANNALES.map(a => {
           const s = getScore(a, chapitres);
-          // Le chapitre passé à onStartExam = premier de la liste
-          const chapitreExam = a.chapitres[0];
           return (
             <div
               key={a.year}
               className="annale-item"
               onClick={() => {
-                onStartExam(chapitreExam, a.year);
+                onStartExam("Mixte", a.year);
                 showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
               }}
             >
@@ -51,7 +57,7 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
                 className="annale-start-btn"
                 onClick={e => {
                   e.stopPropagation();
-                  onStartExam(chapitreExam, a.year);
+                  onStartExam("Mixte", a.year);
                   showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
                 }}
               >

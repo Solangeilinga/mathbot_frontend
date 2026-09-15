@@ -83,8 +83,8 @@ export default function ExamSimulationPage({ chapter, session = "2025", onExit, 
         setQuestions(parseSujet(data.sujet));
       } catch {
         setError(
-          `Le sujet BEPC ${session} (${chapter}) n'est pas encore disponible. ` +
-          `Seul le sujet BEPC 2025 (Mixte) est actif pour l'instant — reviens aux annales et essaie celui-là.`
+          `Le sujet BEPC ${session} n'est pas encore disponible. ` +
+          `Les sujets 2025, 2023, 2022 et 2021 sont actifs — reviens aux annales et essaie l'un d'eux.`
         );
       } finally {
         setLoading(false);
