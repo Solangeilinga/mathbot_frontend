@@ -16,27 +16,32 @@ export function cleanMath(input) {
   if (!input || typeof input !== "string") return input;
   let s = input;
 
+  // Exposants, indices et racines d'abord : leurs accolades empêcheraient sinon de reconnaître \frac{..}{..}
   s = s.replace(/\\sqrt\s*\{([^{}]*)\}/g, (_, a) => `√${wrap(a)}`);
+  s = s.replace(/\\sqrt\s*([A-Za-z0-9.]+)/g, "√$1");
   s = s.replace(/\\(?:vec|overrightarrow)\s*\{([^{}]*)\}/g, "→$1");
   s = s.replace(/\\text\s*\{([^{}]*)\}/g, "$1");
-  for (let i = 0; i < 3; i++) {
-    s = s.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, (_, a, b) => `${wrap(a)}/${wrap(b)}`);
-  }
+  s = s.replace(/\\mathbb\s*\{?\s*([RNZQC])\s*\}?/g, (_, c) => ({ R: "ℝ", N: "ℕ", Z: "ℤ", Q: "ℚ", C: "ℂ" })[c]);
   s = s.replace(/\^\{\\circ\}|\^\\circ|\\circ/g, "°");
   s = s.replace(/\^(?:\{([^{}]*)\}|([0-9nx+-]))/g, (m, a, b) => mapChars(a ?? b, SUPERSCRIPTS) ?? `^${a ?? b}`);
   s = s.replace(/_(?:\{([^{}]*)\}|([0-9nxi]))/g, (m, a, b) => mapChars(a ?? b, SUBSCRIPTS) ?? `_${a ?? b}`);
+  for (let i = 0; i < 3; i++) {
+    s = s.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, (_, a, b) => `${wrap(a)}/${wrap(b)}`);
+  }
 
   const symbols = {
     times: "×", cdot: "·", div: "÷", pm: "±",
     leq: "≤", le: "≤", geq: "≥", ge: "≥", neq: "≠", ne: "≠", approx: "≈",
     pi: "π", infty: "∞", angle: "∠", Rightarrow: "⇒", rightarrow: "→", Leftrightarrow: "⇔",
-    in: "∈", cup: "∪", cap: "∩",
+    in: "∈", cup: "∪", cap: "∩", setminus: "∖",
   };
-  s = s.replace(/\\([A-Za-z]+)/g, (_, name) => symbols[name] ?? (name === "left" || name === "right" ? "" : name));
+  const dropped = new Set(["left", "right", "displaystyle", "textstyle"]);
+  s = s.replace(/\\([A-Za-z]+)/g, (_, name) => symbols[name] ?? (dropped.has(name) ? "" : name));
 
   s = s
     .replace(/\\[()[\]]/g, "")
     .replace(/\$\$?([^$\n]+)\$\$?/g, "$1")
+    .replace(/\\([{}])/g, "$1")
     .replace(/\\[,;!]/g, " ")
     .replace(/\\%/g, "%");
 

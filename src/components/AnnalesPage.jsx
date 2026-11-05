@@ -39,8 +39,8 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
         <p className="annales-sub">Entraîne-toi sur les vrais sujets du BEPC</p>
 
         {ANNALES.map(a => {
-          const s = getScore(a, chapitres);
           const available = a.available !== false;
+          const s = available ? getScore(a, chapitres) : null;
           return (
             <div
               key={a.year}

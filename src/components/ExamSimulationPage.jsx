@@ -376,11 +376,13 @@ function ResultsPage({ results, aiNote, aiCorrecting, onRetry, onExit }) {
           </div>
           <div className="rsc-right">
             {verdict && <div className="rsc-verdict">{verdict}</div>}
-            <div className="rsc-stats">
-              <div className="rsc-stat"><span className="rsc-stat-num">{results?.total || 0}</span><span className="rsc-stat-lbl">Questions</span></div>
-              <div className="rsc-stat"><span className="rsc-stat-num green">{results?.answered || 0}</span><span className="rsc-stat-lbl">Répondues</span></div>
-              <div className="rsc-stat"><span className="rsc-stat-num muted">{(results?.total || 0) - (results?.answered || 0)}</span><span className="rsc-stat-lbl">Ignorées</span></div>
-            </div>
+            {!results?.freeText && (
+              <div className="rsc-stats">
+                <div className="rsc-stat"><span className="rsc-stat-num">{results?.total || 0}</span><span className="rsc-stat-lbl">Questions</span></div>
+                <div className="rsc-stat"><span className="rsc-stat-num green">{results?.answered || 0}</span><span className="rsc-stat-lbl">Répondues</span></div>
+                <div className="rsc-stat"><span className="rsc-stat-num muted">{(results?.total || 0) - (results?.answered || 0)}</span><span className="rsc-stat-lbl">Ignorées</span></div>
+              </div>
+            )}
           </div>
         </div>
 
