@@ -4,19 +4,21 @@
 // juste informatifs (thèmes réellement présents dans le sujet, pour l'affichage
 // et le score par thème) — 2025/2023/2022/2021 sont de vrais sujets transcrits ;
 // 2020 n'a pas été trouvé (aucune source fiable, probablement lié aux
-// perturbations de cette session au Burkina Faso) et retombera sur le message
-// "pas encore disponible".
+// perturbations de cette session au Burkina Faso) : sa carte est donc
+// désactivée (available: false, badge "Bientôt").
 const ANNALES = [
-  { year: "2025", title: "Sujet BEPC 2025", chapitres: ["Mixte"] },
-  { year: "2023", title: "Sujet BEPC 2023", chapitres: ["Algèbre", "Géométrie", "Fonctions"] },
-  { year: "2022", title: "Sujet BEPC 2022", chapitres: ["Fonctions", "Algèbre", "Statistiques"] },
-  { year: "2021", title: "Sujet BEPC 2021", chapitres: ["Algèbre", "Géométrie", "Statistiques"] },
-  { year: "2020", title: "Sujet BEPC 2020", chapitres: ["Trigonométrie", "Fonctions", "Statistiques"] },
+  { year: "2025", chapitres: ["Mixte"] },
+  { year: "2023", chapitres: ["Algèbre", "Géométrie", "Fonctions"] },
+  { year: "2022", chapitres: ["Fonctions", "Algèbre", "Statistiques"] },
+  { year: "2021", chapitres: ["Algèbre", "Géométrie", "Statistiques"] },
+  { year: "2020", chapitres: ["Trigonométrie", "Fonctions", "Statistiques"], available: false },
 ];
 
 function getScore(annale, chapitres) {
   if (!chapitres?.length) return null;
+  // "Mixte" regroupe les examens blancs de toutes les années : on ne l'attribue pas à une annale précise
   const scores = annale.chapitres
+    .filter(ch => ch !== "Mixte")
     .map(ch => chapitres.find(c => c.name === ch)?.score ?? null)
     .filter(s => s !== null);
   return scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -38,31 +40,38 @@ export default function AnnalesPage({ onStartExam, showToast, chapitres }) {
 
         {ANNALES.map(a => {
           const s = getScore(a, chapitres);
+          const available = a.available !== false;
           return (
             <div
               key={a.year}
-              className="annale-item"
+              className={`annale-item ${available ? "" : "disabled"}`}
+              aria-disabled={!available}
               onClick={() => {
+                if (!available) return;
                 onStartExam("Mixte", a.year);
                 showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
               }}
             >
               <div className="annale-year">{a.year}</div>
               <div className="annale-info">
-                <div className="annale-title-text">{a.title}</div>
+                <div className="annale-title-text">Sujet BEPC<span className="annale-title-year"> {a.year}</span></div>
                 <div className="annale-tags">{a.chapitres.join(" · ")}</div>
               </div>
               <div className={`annale-score ${scoreClass(s)}`}>{s !== null ? `${s}%` : "—"}</div>
-              <button
-                className="annale-start-btn"
-                onClick={e => {
-                  e.stopPropagation();
-                  onStartExam("Mixte", a.year);
-                  showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
-                }}
-              >
-                Commencer →
-              </button>
+              {available ? (
+                <button
+                  className="annale-start-btn"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onStartExam("Mixte", a.year);
+                    showToast(`Sujet BEPC ${a.year} — Bonne chance !`);
+                  }}
+                >
+                  Commencer →
+                </button>
+              ) : (
+                <span className="annale-soon">Bientôt</span>
+              )}
             </div>
           );
         })}

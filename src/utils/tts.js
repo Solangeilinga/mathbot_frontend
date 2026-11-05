@@ -2,6 +2,7 @@
 // systématique sur la voix du navigateur. Utilisé par ChatArea et ExerciseAnalyzer
 // pour éviter d'avoir deux implémentations qui divergent.
 import { ttsAPI } from "./api";
+import { cleanMath } from "./math";
 
 export function playAudioBase64(base64, mimeType, { onStart, onEnd } = {}) {
   try {
@@ -65,7 +66,8 @@ export function speakBrowser(text, { onStart, onEnd } = {}) {
  * d'audio (pas de clé configurée -> { silent: true }) ou échoue.
  * Retourne le handle audio (Audio ou SpeechSynthesisUtterance) ou null.
  */
-export async function speakText(text, { onStart, onEnd } = {}) {
+export async function speakText(rawText, { onStart, onEnd } = {}) {
+  const text = cleanMath(rawText);
   try {
     const data = await ttsAPI.synthesize(text);
     if (data.audioContent) {

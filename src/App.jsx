@@ -10,7 +10,6 @@ import Toast from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { useProgression } from "./hooks/useProgression";
 import { useAuth } from "./hooks/useAuth";
-import { progressionAPI } from "./utils/api";
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -18,18 +17,12 @@ export default function App() {
   const [currentExamSession, setCurrentExamSession] = useState("2025");
   const { toast, showToast } = useToast();
   const { user, authError, authLoading, login, register, logout, updateXP } = useAuth();
-  const { chapitres, stats, loading: progLoading, refetch } = useProgression();
+  const { progression, chapitres, stats, loading: progLoading, refetch } = useProgression(user?.id);
 
-  // Synchronise le XP réel depuis l'API dès qu'un utilisateur est connecté
+  // Synchronise le XP réel depuis l'API à chaque (re)chargement de la progression
   useEffect(() => {
-    if (!user) return;
-    progressionAPI
-      .get()
-      .then((data) => {
-        if (data?.xp !== undefined) updateXP(data.xp, data.niveau);
-      })
-      .catch(() => {});
-  }, [user?.id]); // eslint-disable-line
+    if (progression?.xp !== undefined) updateXP(progression.xp, progression.niveau);
+  }, [progression]); // eslint-disable-line
 
   if (!user) {
     return (
@@ -68,6 +61,7 @@ export default function App() {
         {activePage === "dashboard" && (
           <Dashboard
             onChapterClick={goToChapter}
+            onOpenAnnales={() => setActivePage("annales")}
             user={user}
             chapitres={chapitres}
             stats={stats}
@@ -81,7 +75,7 @@ export default function App() {
             onXPUpdate={handleXPUpdate}
             showToast={showToast}
             user={user}
-            chapitres={chapitres}
+            chapitres={chapitres.filter((c) => c.name !== "Mixte")}
           />
         )}
         {activePage === "annales" && (

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { exerciseAPI, progressionAPI } from "../utils/api";
 import { speakText } from "../utils/tts";
+import { cleanMath } from "../utils/math";
 
 // ── Parse la réponse en sections ──────────────────────────────────────────────
 function parseAnalysis(text) {
@@ -123,7 +124,7 @@ export default function ExerciseAnalyzer({ chapter, user, showToast, onXPUpdate 
       }
 
       const data = await exerciseAPI.analyze(payload);
-      const parsed = parseAnalysis(data.reply);
+      const parsed = parseAnalysis(cleanMath(data.reply));
       setResult(parsed);
       setExercises(parsed.exercises.map(ex => ({ ...ex })));
 

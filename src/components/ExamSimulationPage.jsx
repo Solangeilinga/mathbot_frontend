@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { subjectAPI, examAPI } from "../utils/api";
+import RichText from "./RichText";
 
 const EXAM_DURATION = 2 * 60 * 60;
 
@@ -426,10 +427,7 @@ function ResultsPage({ results, aiNote, aiCorrecting, onRetry, onExit }) {
           <div className="results-section">
             <h3 className="results-section-title">🦉 Correction de MathBot</h3>
             <div className="ai-correction-card">
-              {aiNote.correction.split("\n").filter(Boolean).map((line, i) => {
-                const isTitle = /^[\d]+[.)]\s+[A-ZÀÉÈÊ]/.test(line) || /^[A-ZÀÉÈÊ][^a-z]{0,3}:/.test(line);
-                return <div key={i} className={`ai-line ${isTitle ? "title" : ""}`}>{line}</div>;
-              })}
+              <RichText text={aiNote.correction} />
             </div>
           </div>
         )}

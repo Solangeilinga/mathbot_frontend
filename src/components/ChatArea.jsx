@@ -3,6 +3,8 @@ import VoiceButton from "./VoiceButton";
 import SpeakButton from "./SpeakButton";
 import { chatAPI, progressionAPI } from "../utils/api";
 import { speakText } from "../utils/tts";
+import { cleanMath } from "../utils/math";
+import { renderInline } from "./RichText";
 import { useSpeechRecognition } from "../hooks/useSpeech";
 
 const QUICK_ACTIONS = [
@@ -342,9 +344,10 @@ function MessageBubble({ msg, onSelectOption, onSpeak, speakingId }) {
   if (msg.type === "text") {
     // Pendant le streaming, on n'essaie pas encore de parser un éventuel QCM :
     // le texte est incomplet et un "A." isolé afficherait des boutons prématurés.
-    const exercise  = !msg.answered && !msg.streaming ? parseExercise(msg.content) : null;
+    const content   = cleanMath(msg.content);
+    const exercise  = !msg.answered && !msg.streaming ? parseExercise(content) : null;
     const optReg    = /^[ABCD][.)•\-]\s+/i;
-    const textLines = msg.content.split("\n").map(l => l.trim()).filter(l => {
+    const textLines = content.split("\n").map(l => l.trim()).filter(l => {
       if (!l) return false;
       if (!exercise) return true;
       if (optReg.test(l)) return false;
@@ -354,7 +357,7 @@ function MessageBubble({ msg, onSelectOption, onSpeak, speakingId }) {
     return (
       <div className="msg-bot">
         <div className="bubble-bot">
-          {textLines.map((line, i) => <span key={i}>{line}<br /></span>)}
+          {textLines.map((line, i) => <span key={i}>{renderInline(line)}<br /></span>)}
           {msg.streaming && <span className="stream-cursor" aria-hidden="true" />}
           {exercise && !msg.answered && (
             <div className="chat-options">
@@ -363,7 +366,7 @@ function MessageBubble({ msg, onSelectOption, onSpeak, speakingId }) {
                   onClick={() => onSelectOption(msg.id, opt.label, opt.correct)}
                 >
                   <span className="opt-letter">{opt.letter}</span>
-                  <span className="opt-text">{opt.text}</span>
+                  <span className="opt-text">{renderInline(opt.text)}</span>
                 </button>
               ))}
             </div>

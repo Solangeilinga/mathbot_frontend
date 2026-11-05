@@ -9,6 +9,7 @@ const CHAPTER_META = {
   Fonctions:     { sub: "Affines, représentation" },
   Statistiques:  { sub: "Moyenne, médiane" },
   Trigonométrie: { sub: "Sin, Cos, Tan" },
+  Mixte:         { sub: "Sujets BEPC complets", label: "Examens blancs" },
 };
 
 function getBadge(score) {
@@ -18,12 +19,13 @@ function getBadge(score) {
   return              { badge: "Priorité",         badgeClass: "priority", color: "red"    };
 }
 
-export function useProgression() {
+export function useProgression(userId) {
   const [progression, setProgression] = useState(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
 
   const fetch = useCallback(async () => {
+    if (!userId) return;
     setLoading(true);
     try {
       const data = await progressionAPI.get();
@@ -34,9 +36,12 @@ export function useProgression() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    if (userId) fetch();
+    else setProgression(null);
+  }, [userId, fetch]);
 
   // Enrichit les chapitres avec meta + badge — avec vérification que c'est bien un tableau
   const chapitresRaw = progression?.chapitres;

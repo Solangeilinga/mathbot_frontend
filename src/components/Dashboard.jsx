@@ -1,6 +1,6 @@
 import Leaderboard from "./Leaderboard";
 
-export default function Dashboard({ onChapterClick, user, chapitres, stats, loading }) {
+export default function Dashboard({ onChapterClick, onOpenAnnales, user, chapitres, stats, loading }) {
   if (loading) return <div className="dashboard"><div className="dash-card"><div className="dash-loading">Chargement de ta progression...</div></div></div>;
   return (
     <div className="dashboard" style={{animation:"fade-in .4s ease"}}>
@@ -15,8 +15,8 @@ export default function Dashboard({ onChapterClick, user, chapitres, stats, load
           ? <p className="dash-empty">Commence une session pour voir ta progression !</p>
           : <div className="chapters-grid">
               {chapitres.map(ch => (
-                <div key={ch.name} className="chapter-card" onClick={() => onChapterClick(ch.name)}>
-                  <div className="chapter-name">{ch.name}</div>
+                <div key={ch.name} className="chapter-card" onClick={() => (ch.name === "Mixte" ? onOpenAnnales() : onChapterClick(ch.name))}>
+                  <div className="chapter-name">{ch.label || ch.name}</div>
                   <div className="chapter-sub">{ch.sub}</div>
                   <div className="progress-bar"><div className={`progress-fill ${ch.color}`} style={{width:`${ch.score}%`}}/></div>
                   <div className="chapter-footer">

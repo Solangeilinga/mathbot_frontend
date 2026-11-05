@@ -14,6 +14,7 @@ function sanitizeUser(u) {
 export function useAuth() {
   const [user, setUser] = useState(() => {
     try {
+      if (!localStorage.getItem("bepc_token")) return null;
       const stored = localStorage.getItem("bepc_user");
       return stored ? sanitizeUser(JSON.parse(stored)) : null;
     } catch { return null; }
@@ -34,11 +35,14 @@ export function useAuth() {
           setUser(fresh);
         }
       })
-      .catch(() => {
-        // Token expiré ou invalide → déconnexion silencieuse
-        localStorage.removeItem("bepc_token");
-        localStorage.removeItem("bepc_user");
-        setUser(null);
+      .catch((err) => {
+        // Déconnexion seulement si le serveur rejette le token (401/403) : une
+        // erreur réseau ou un démarrage à froid du backend ne doit pas déconnecter.
+        if (err.status === 401 || err.status === 403) {
+          localStorage.removeItem("bepc_token");
+          localStorage.removeItem("bepc_user");
+          setUser(null);
+        }
       });
   }, []); // eslint-disable-line
 
